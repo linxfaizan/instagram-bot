@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+
 const { miningConfig } = require("../config/mining");
 
 const miningGameSchema = new mongoose.Schema(
@@ -6,48 +7,57 @@ const miningGameSchema = new mongoose.Schema(
         instagramId: {
             type: String,
             required: true,
-            trim: true,
-            index: true
+            trim: true
         },
+
         bet: {
             type: Number,
             required: true,
             min: 1,
             validate: Number.isSafeInteger
         },
+
         bombPositions: {
             type: [Number],
             required: true,
             validate: {
                 validator(positions) {
-                    return Array.isArray(positions) &&
+                    return (
+                        Array.isArray(positions) &&
                         positions.length === miningConfig.BOMBS &&
-                        positions.every((position) =>
-                            Number.isSafeInteger(position) &&
-                            position >= 1 &&
-                            position <= miningConfig.BOARD_SIZE
+                        positions.every(
+                            (position) =>
+                                Number.isSafeInteger(position) &&
+                                position >= 1 &&
+                                position <= miningConfig.BOARD_SIZE
                         ) &&
-                        new Set(positions).size === positions.length;
+                        new Set(positions).size === positions.length
+                    );
                 },
                 message: "Invalid mining bomb positions"
             }
         },
+
         revealedTiles: {
             type: [Number],
             default: () => [],
             validate: {
                 validator(positions) {
-                    return Array.isArray(positions) &&
-                        positions.every((position) =>
-                            Number.isSafeInteger(position) &&
-                            position >= 1 &&
-                            position <= miningConfig.BOARD_SIZE
+                    return (
+                        Array.isArray(positions) &&
+                        positions.every(
+                            (position) =>
+                                Number.isSafeInteger(position) &&
+                                position >= 1 &&
+                                position <= miningConfig.BOARD_SIZE
                         ) &&
-                        new Set(positions).size === positions.length;
+                        new Set(positions).size === positions.length
+                    );
                 },
                 message: "Invalid mining revealed tiles"
             }
         },
+
         safeMines: {
             type: Number,
             default: 0,
@@ -55,36 +65,52 @@ const miningGameSchema = new mongoose.Schema(
             max: miningConfig.MAX_SAFE_MINES,
             validate: Number.isSafeInteger
         },
+
         currentMultiplier: {
             type: Number,
             default: 1,
             min: 1
         },
+
         status: {
             type: String,
             enum: ["active", "cashed_out", "lost", "completed"],
             default: "active",
             index: true
         },
+
         payout: {
             type: Number,
             default: null,
             min: 1,
-            validate: (value) => value === null || Number.isSafeInteger(value)
+            validate: (value) =>
+                value === null || Number.isSafeInteger(value)
         },
+
         endedAt: {
             type: Date,
             default: null
         }
     },
-    { timestamps: true }
+    {
+        timestamps: true
+    }
 );
 
+/*
+ * Only one ACTIVE mining game per Instagram user.
+ *
+ * IMPORTANT:
+ * Do not add `index: true` to instagramId above.
+ * This partial unique index is the only instagramId index needed.
+ */
 miningGameSchema.index(
     { instagramId: 1 },
     {
         unique: true,
-        partialFilterExpression: { status: "active" }
+        partialFilterExpression: {
+            status: "active"
+        }
     }
 );
 

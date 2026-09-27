@@ -68,15 +68,21 @@ async function getCashRankByInstagramId(instagramId) {
     return higherBalanceCount + 1;
 }
 
-async function addInventoryItem(instagramId, itemId, session = null) {
+async function addInventoryItem(instagramId, itemId, quantityOrSession = 1, session = null) {
     if (typeof instagramId !== "string" || instagramId.trim() === "") {
         throw new Error("Invalid Instagram ID");
     }
     if (typeof itemId !== "string" || itemId.trim() === "") {
         throw new Error("Invalid inventory item ID");
     }
+    const quantityToAdd = typeof quantityOrSession === "number" ? quantityOrSession : 1;
+    const transactionSession = typeof quantityOrSession === "number" ? session : quantityOrSession;
 
-    const user = await User.findOne({ instagramId: instagramId.trim() }).session(session);
+    if (!Number.isSafeInteger(quantityToAdd) || quantityToAdd <= 0) {
+        throw new Error("Invalid inventory quantity");
+    }
+
+    const user = await User.findOne({ instagramId: instagramId.trim() }).session(transactionSession);
     if (!user) {
         throw new Error("User not found");
     }
@@ -88,25 +94,25 @@ async function addInventoryItem(instagramId, itemId, session = null) {
     const otherEntries = inventory.filter((item) => !item || item.itemId !== itemId);
 
     if (existingEntries.length > 0) {
-        const quantity = existingEntries.reduce((total, item) => {
+        const existingQuantity = existingEntries.reduce((total, item) => {
             if (!Number.isSafeInteger(item.quantity) || item.quantity < 1) {
                 throw new Error("Invalid inventory item quantity");
             }
             return total + item.quantity;
         }, 0);
 
-        if (!Number.isSafeInteger(quantity + 1)) {
+        if (!Number.isSafeInteger(existingQuantity + quantityToAdd)) {
             throw new Error("Inventory item quantity is too large");
         }
 
-        otherEntries.push({ ...existingEntries[0], itemId, quantity: quantity + 1 });
+        otherEntries.push({ ...existingEntries[0], itemId, quantity: existingQuantity + quantityToAdd });
     } else {
-        otherEntries.push({ itemId, quantity: 1 });
+        otherEntries.push({ itemId, quantity: quantityToAdd });
     }
 
     user.inventory = otherEntries;
     user.markModified("inventory");
-    await user.save({ session });
+    await user.save({ session: transactionSession });
     return user;
 }
 
