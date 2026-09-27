@@ -9,6 +9,7 @@ const begCommand = require("./beg");
 const fishCommand = require("./fish");
 const inventoryCommand = require("./inventory");
 const sellCommand = require("./sell");
+const mineCommand = require("./mine");
 
 const commands = {
     balance: balanceCommand,
@@ -21,7 +22,8 @@ const commands = {
     beg: begCommand,
     fish: fishCommand,
     inventory: inventoryCommand,
-    sell: sellCommand
+    sell: sellCommand,
+    mine: mineCommand
 };
 
 function getCommand(commandName) {

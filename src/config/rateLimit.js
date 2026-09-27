@@ -13,6 +13,7 @@ module.exports = {
         "beg",
         "fish",
         "sell",
-        "buy"
+        "buy",
+        "mine"
     ])
 };

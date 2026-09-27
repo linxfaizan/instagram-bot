@@ -73,13 +73,13 @@ async function addCoins(instagramId, amount, transactionType, metadata, session 
     return session ? addCoinsOperation(session) : withTransaction(addCoinsOperation);
 }
 
-async function removeCoins(instagramId, amount, transactionType, metadata) {
+async function removeCoins(instagramId, amount, transactionType, metadata, session = null) {
     validateAmount(amount);
     const normalizedId = normalizeInstagramId(instagramId);
     const normalizedType = validateTransactionType(transactionType);
 
-    return withTransaction(async (session) => {
-        const userExists = await User.exists({ instagramId: normalizedId }).session(session);
+    const removeCoinsOperation = async (transactionSession) => {
+        const userExists = await User.exists({ instagramId: normalizedId }).session(transactionSession);
         if (!userExists) {
             throw new Error("User not found");
         }
@@ -87,7 +87,7 @@ async function removeCoins(instagramId, amount, transactionType, metadata) {
         const user = await User.findOneAndUpdate(
             { instagramId: normalizedId, coins: { $gte: amount } },
             { $inc: { coins: -amount } },
-            { returnDocument: "after", runValidators: true, session }
+            { returnDocument: "after", runValidators: true, session: transactionSession }
         );
 
         if (!user) {
@@ -96,11 +96,13 @@ async function removeCoins(instagramId, amount, transactionType, metadata) {
 
         await Transaction.create(
             [{ from: normalizedId, to: null, amount, type: normalizedType, metadata: metadata || {} }],
-            { session }
+            { session: transactionSession }
         );
 
         return user;
-    });
+    };
+
+    return session ? removeCoinsOperation(session) : withTransaction(removeCoinsOperation);
 }
 
 async function transferCoins(fromInstagramId, toInstagramId, amount, metadata, session = null) {
