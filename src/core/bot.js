@@ -3,6 +3,7 @@ const workCommand = require("../commands/work");
 const { parseCommand } = require("../parser/commandParser");
 const defaultRateLimitService = require("../services/rateLimitService");
 const { isCommandNotAccepted } = require("../services/rateLimitService");
+const { sendMessage } = require("../services/instagramService");
 
 async function handleMessage(message, options = {}) {
     if (
@@ -20,6 +21,7 @@ async function handleMessage(message, options = {}) {
     }
 
     const parsed = parseCommand(message.text);
+
     if (!parsed) {
         try {
             return await workCommand.handleCareerSelection(message);
@@ -32,6 +34,7 @@ async function handleMessage(message, options = {}) {
     }
 
     const command = getCommand(parsed.command);
+
     if (!command) {
         return {
             type: "text",
@@ -39,10 +42,17 @@ async function handleMessage(message, options = {}) {
         };
     }
 
-    const rateLimitService = options.rateLimitService ?? defaultRateLimitService;
-    const admission = rateLimitService.beginCommand(message.userId, parsed.command);
+    const rateLimitService =
+        options.rateLimitService ?? defaultRateLimitService;
+
+    const admission = rateLimitService.beginCommand(
+        message.userId,
+        parsed.command
+    );
+
     if (!admission.allowed) {
         const seconds = Math.ceil(admission.retryAfterMs / 1000);
+
         return {
             type: "text",
             text: `⏳ Slow down! Try again in ${seconds}s.`
@@ -51,14 +61,28 @@ async function handleMessage(message, options = {}) {
 
     let response;
     let accepted = true;
+
     try {
         response = await command({
-            message: { ...message, userId: message.userId.trim() },
+            message: {
+                ...message,
+                userId: message.userId.trim()
+            },
             command: parsed.command,
-            args: parsed.args
+            args: parsed.args,
+
+            // Allows commands such as /accept and /reject
+            // to send a DM directly to another Instagram user.
+            sendMessage: options.sendMessage ?? sendMessage
         });
-    } catch {
+    } catch (error) {
         accepted = false;
+
+        console.error(
+            `[COMMAND] /${parsed.command} failed:`,
+            error
+        );
+
         response = {
             type: "text",
             text: "❌ Something went wrong. Please try again."
@@ -68,7 +92,12 @@ async function handleMessage(message, options = {}) {
     if (isCommandNotAccepted(response)) {
         accepted = false;
     }
-    rateLimitService.finishCommand(admission.ticket, accepted);
+
+    rateLimitService.finishCommand(
+        admission.ticket,
+        accepted
+    );
+
     return response;
 }
 

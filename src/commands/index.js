@@ -11,6 +11,23 @@ const inventoryCommand = require("./inventory");
 const sellCommand = require("./sell");
 const mineCommand = require("./mine");
 
+// Shop
+const shopCommand = require("./shop");
+const buyCommand = require("./buy");
+
+// Marriage
+const marryCommand = require("./marry");
+const acceptCommand = require("./accept");
+const rejectCommand = require("./reject");
+const divorceCommand = require("./divorce");
+const coupleCommand = require("./couple");
+
+// Coin Flip
+const coinflipCommand = require("./coinflip");
+
+// Help
+const helpCommand = require("./help");
+
 const commands = {
     balance: balanceCommand,
     daily: dailyCommand,
@@ -23,7 +40,25 @@ const commands = {
     fish: fishCommand,
     inventory: inventoryCommand,
     sell: sellCommand,
-    mine: mineCommand
+    mine: mineCommand,
+
+    // Shop
+    shop: shopCommand,
+    buy: buyCommand,
+
+    // Marriage
+    marry: marryCommand,
+    accept: acceptCommand,
+    reject: rejectCommand,
+    divorce: divorceCommand,
+    couple: coupleCommand,
+
+    // Coin Flip
+    cf: coinflipCommand,
+    coinflip: coinflipCommand,
+
+    // Help
+    help: helpCommand
 };
 
 function getCommand(commandName) {

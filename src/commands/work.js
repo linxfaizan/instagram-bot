@@ -20,143 +20,95 @@ const {
 const WORK_DURATION_MS = 60 * 60 * 1000;
 
 /**
- * ─────────────────────────────────────────────
  * UI HELPERS
- * ─────────────────────────────────────────────
  */
 
 function careerMenu() {
     const options = jobs
         .map(
             (job, index) =>
-                `│ ${index + 1}. ${job.emoji} ${job.name}`
+                `${index + 1}. ${job.emoji} ${job.name}`
         )
         .join("\n");
 
-    return `╭──────────────────────────╮
-│       💼 ECO WORK         │
-╰──────────────────────────╯
+    return `💼 ECO WORK
 
-Choose your career to start
-earning coins.
+Choose your career to start earning coins.
 
-┌─ 🧑‍💼 CAREERS ─────────────┐
+🧑‍💼 CAREERS
 ${options}
-└───────────────────────────┘
 
-💡 Reply with the number of
-your choice.`;
+💡 Reply with the number of your choice.`;
 }
 
 function careerSelectionError() {
     return `❌ Invalid Career
 
-Please choose a number from
-1 to ${jobs.length}.
+Please choose a number from 1 to ${jobs.length}.
 
 ${careerMenu()}`;
 }
 
 function careerSelectedUI(job) {
-    return `╭──────────────────────────╮
-│      🎉 CAREER SELECTED    │
-╰──────────────────────────╯
+    return `🎉 CAREER SELECTED
 
-        ${job.emoji} ${job.name}
+${job.emoji} ${job.name}
 
-┌─ 💼 YOUR CAREER ──────────┐
-│                           │
-│  Career: ${job.name}
-│                           │
-│  💰 Reward
-│  ${job.minReward}–${job.maxReward} coins
-│                           │
-│  ⏱️ Shift Duration
-│  1 hour
-│                           │
-└───────────────────────────┘
+💼 Your Career
+Career: ${job.name}
+💰 Reward: ${job.minReward}–${job.maxReward} coins
+⏱️ Shift Duration: 1 hour
 
-🚀 Use /work to start
-   your first shift!`;
+🚀 Use /work to start your first shift!`;
 }
 
 function workStartedUI(job) {
-    return `╭──────────────────────────╮
-│       🛠️ SHIFT STARTED    │
-╰──────────────────────────╯
+    return `🛠️ SHIFT STARTED
 
-        ${job.emoji} ${job.name}
+${job.emoji} ${job.name}
 
-┌─ 💼 CURRENT SHIFT ────────┐
-│                           │
-│  🧑‍💼 Job
-│  ${job.name}
-│                           │
-│  ⏱️ Duration
-│  1 hour
-│                           │
-│  💰 Possible Reward
-│  ${job.minReward}–${job.maxReward} coins
-│                           │
-└───────────────────────────┘
+💼 Current Shift
+Job: ${job.name}
+⏱️ Duration: 1 hour
+💰 Possible Reward: ${job.minReward}–${job.maxReward} coins
 
 ⏳ Your shift is now active.
 
 💡 Come back after 1 hour
-   and use /work to claim
-   your earnings.`;
+and use /work to claim your earnings.`;
 }
 
 function workInProgressUI(job, remainingMilliseconds) {
-    return `╭──────────────────────────╮
-│       ⏳ WORKING...        │
-╰──────────────────────────╯
+    return `⏳ WORKING...
 
-        ${job.emoji} ${job.name}
+${job.emoji} ${job.name}
 
-┌─ 🛠️ CURRENT SHIFT ────────┐
-│                           │
-│  💼 Job
-│  ${job.name}
-│                           │
-│  ⏱️ Time Remaining
-│  ${formatRemainingTime(remainingMilliseconds)}
-│                           │
-│  💰 Reward
-│  ${job.minReward}–${job.maxReward}
-│                           │
-└───────────────────────────┘
+💼 Current Shift
+Job: ${job.name}
+⏱️ Time Remaining: ${formatRemainingTime(
+        remainingMilliseconds
+    )}
+💰 Reward: ${job.minReward}–${job.maxReward} coins
 
 🔒 Your shift is still active.
 
-Come back when the timer
-reaches 0 to claim your
-earnings.`;
+Come back when the timer reaches 0
+to claim your earnings.`;
 }
 
 function workCompleteUI(job, reward, balance) {
-    return `╭──────────────────────────╮
-│      🎉 WORK COMPLETE!    │
-╰──────────────────────────╯
+    return `🎉 WORK COMPLETE!
 
-        ${job.emoji} ${job.name}
+${job.emoji} ${job.name}
 
-┌─ 💰 EARNINGS ─────────────┐
-│                           │
-│  🪙 Shift Reward
-│  +${formatNumber(reward)} coins
-│                           │
-│  💳 New Balance
-│  ${formatNumber(balance)} coins
-│                           │
-└───────────────────────────┘
+💰 Earnings
+🪙 Shift Reward: +${formatNumber(reward)} coins
+💳 New Balance: ${formatNumber(balance)} coins
 
 ✨ XP earned!
-📈 Your work progress has
-   increased.
+📈 Your work progress has increased.
 
-🚀 Use /work to start
-   your next shift.`;
+🚀 Use /work to start your next shift.`;
 }
 
 function formatNumber(number) {
@@ -187,9 +139,7 @@ function getJob(jobId) {
 }
 
 /**
- * ─────────────────────────────────────────────
  * CAREER SELECTION
- * ─────────────────────────────────────────────
  */
 
 async function handleCareerSelection(message) {
@@ -262,9 +212,7 @@ async function handleCareerSelection(message) {
 }
 
 /**
- * ─────────────────────────────────────────────
  * WORK COMMAND
- * ─────────────────────────────────────────────
  */
 
 async function workCommand({ message }) {
@@ -278,6 +226,7 @@ async function workCommand({ message }) {
     /**
      * No career selected
      */
+
     if (!user.job) {
         await User.updateOne(
             {
@@ -302,6 +251,7 @@ async function workCommand({ message }) {
     /**
      * Saved career no longer exists
      */
+
     if (!job) {
         return {
             type: "text",
@@ -314,9 +264,7 @@ async function workCommand({ message }) {
     const now = new Date(Date.now());
 
     /**
-     * ─────────────────────────────────────────
      * START SHIFT
-     * ─────────────────────────────────────────
      */
 
     if (!user.workStartedAt) {
@@ -373,6 +321,7 @@ async function workCommand({ message }) {
         /**
          * Another request started the shift
          */
+
         if (!startedUser) {
             user = await User.findOne({
                 instagramId
@@ -395,9 +344,7 @@ async function workCommand({ message }) {
     }
 
     /**
-     * ─────────────────────────────────────────
      * CHECK SHIFT TIMER
-     * ─────────────────────────────────────────
      */
 
     const startedAt = user.workStartedAt;
@@ -411,6 +358,7 @@ async function workCommand({ message }) {
     /**
      * Still working
      */
+
     if (remainingMilliseconds > 0) {
         return markCommandNotAccepted({
             type: "text",
@@ -422,9 +370,7 @@ async function workCommand({ message }) {
     }
 
     /**
-     * ─────────────────────────────────────────
      * CLAIM REWARD
-     * ─────────────────────────────────────────
      */
 
     const reward = randomInt(
@@ -467,6 +413,7 @@ async function workCommand({ message }) {
                     /**
                      * Prevent double claiming
                      */
+
                     if (!claimedUser) {
                         return {
                             claimed: false
@@ -515,6 +462,7 @@ async function workCommand({ message }) {
     /**
      * Already claimed
      */
+
     if (!claimResult.claimed) {
         return markCommandNotAccepted({
             type: "text",
@@ -525,9 +473,7 @@ async function workCommand({ message }) {
     }
 
     /**
-     * ─────────────────────────────────────────
      * WORK COMPLETE
-     * ─────────────────────────────────────────
      */
 
     return {
@@ -541,5 +487,6 @@ async function workCommand({ message }) {
 }
 
 module.exports = workCommand;
+
 module.exports.handleCareerSelection =
     handleCareerSelection;
