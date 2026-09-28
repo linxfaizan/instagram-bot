@@ -44,66 +44,43 @@ function formatProgress(title, username, levelProgress) {
 
     const generalBar = progressBar(
         general.xp,
-        general.requiredXp
+        general.requiredXp,
+        12
     );
 
     const workBar = progressBar(
         work.xp,
-        work.requiredXp
+        work.requiredXp,
+        12
     );
 
-    return `╭──────────────────────────╮
-│       ⭐ ECO PROFILE      │
-╰──────────────────────────╯
+    return `⭐ ECO PROFILE
 
 ${title}
 
-        👤 @${username}
+👤 @${username}
 
-┌─ ✨ GENERAL ──────────────┐
-│                           │
-│  LEVEL        ${String(general.level).padEnd(10)}│
-│                           │
-│  ${generalBar}       │
-│  ${formatNumber(general.xp)} / ${formatNumber(general.requiredXp)} XP
-│                           │
-│  🚀 ${formatNumber(general.xpToNextLevel)} XP to Level ${general.level + 1}
-│                           │
-└───────────────────────────┘
+✨ GENERAL LEVEL
+━━━━━━━━━━━━━━━━
+🏆 Level: ${general.level}
 
-┌─ 💼 WORK ────────────────┐
-│                           │
-│  LEVEL        ${String(work.level).padEnd(10)}│
-│                           │
-│  ${workBar}       │
-│  ${formatNumber(work.xp)} / ${formatNumber(work.requiredXp)} XP
-│                           │
-│  🚀 ${formatNumber(work.xpToNextLevel)} XP to Level ${work.level + 1}
-│                           │
-└───────────────────────────┘
+${generalBar}
 
-╭──────────────────────────╮
-│ 💡 Keep earning XP!      │
-│ 📈 Level up & unlock     │
-│    more Eco features.    │
-╰──────────────────────────╯`;
-}
+💫 ${formatNumber(general.xp)} / ${formatNumber(general.requiredXp)} XP
+🚀 ${formatNumber(general.xpToNextLevel)} XP to Level ${general.level + 1}
 
-/**
- * Build level progress data
- */
-function makeLevelProgress(user) {
-    return {
-        general: getLevelProgress(
-            user.level,
-            user.xp
-        ),
+💼 WORK LEVEL
+━━━━━━━━━━━━━━━━
+🏆 Level: ${work.level}
 
-        work: getLevelProgress(
-            user.workLevel,
-            user.workXp
-        )
-    };
+${workBar}
+
+💫 ${formatNumber(work.xp)} / ${formatNumber(work.requiredXp)} XP
+🚀 ${formatNumber(work.xpToNextLevel)} XP to Level ${work.level + 1}
+
+━━━━━━━━━━━━━━━━
+💡 Keep earning XP!
+📈 Level up to unlock more Eco features.`;
 }
 
 /**
